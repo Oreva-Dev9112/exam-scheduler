@@ -63,6 +63,10 @@ class ExamController extends Controller
                     $new = 'Finished';
                     break;
 
+                case 'Cancelled':
+                    $new = 'Cancelled';
+                    break;
+
                 default:
                     $new = 'Finished';
                     break;

@@ -32,9 +32,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import api from "@/utils/api"
+import { fetchExams, updateExamStatus, usingSampleData } from "@/utils/examApi"
 import {
-  type ApiExam,
   mapExamListFromApi,
   normalizeExamStatus,
   validExamStatuses,
@@ -42,7 +41,7 @@ import {
 import { examColumns } from "./columns"
 import ExamCard from "./ExamCard"
 import type { ExamSession, ExamSessionStatus } from "./types"
-import { getNextStatus, getStatusBadgeVariant } from "./status"
+import { canCancel, getNextStatus, getStatusBadgeVariant } from "./status"
 import { useMediaQuery } from "@/hooks/use-media-query"
 
 const statusOptions: ExamSessionStatus[] = validExamStatuses
@@ -79,13 +78,12 @@ export default function ExamList() {
       setError(null)
 
       try {
-        const { data } = await api.get<ApiExam[]>("/exams", { signal: controller.signal })
-        setSessions(mapExamListFromApi(data))
+        setSessions(mapExamListFromApi(await fetchExams(controller.signal)))
       } catch (fetchError) {
         if ((fetchError as Error).name === "CanceledError") {
           return
         }
-        // eslint-disable-next-line no-console
+         
         console.error("Failed to fetch exams", fetchError)
         setError("Unable to load exam sessions. Please try again.")
       } finally {
@@ -98,21 +96,16 @@ export default function ExamList() {
     return () => controller.abort()
   }, [])
 
-  const handleAdvanceStatus = useCallback(async (session: ExamSession) => {
-    const nextStatus = getNextStatus(session.status)
-    if (!nextStatus) return
-
+  const handleSetStatus = useCallback(async (session: ExamSession, status: ExamSessionStatus) => {
     try {
       setUpdatingExamId(session.id)
-      const { data } = await api.put<{ id: number; status: string }>(`/exams/${session.id}/status`, {
-        status: nextStatus,
-      })
+      const data = await updateExamStatus(session.id, status)
       const normalizedStatus = normalizeExamStatus(data.status)
       setSessions((prev) =>
         prev.map((item) => (item.id === session.id ? { ...item, status: normalizedStatus } : item))
       )
     } catch (updateError) {
-      // eslint-disable-next-line no-console
+       
       console.error("Failed to update exam status", updateError)
     } finally {
       setUpdatingExamId(null)
@@ -198,20 +191,31 @@ export default function ExamList() {
             Current status:
             <span className="ml-1 font-medium text-foreground">{selectedSession.status}</span>
           </p>
-          {nextStatus ? (
-            <Button
-              size="sm"
-              className="gap-2"
-              onClick={() => handleAdvanceStatus(selectedSession)}
-              disabled={updatingExamId === selectedSession.id}
-            >
-              {updatingExamId === selectedSession.id ? "Updating…" : `Advance to ${nextStatus}`}
-            </Button>
-          ) : (
-            <Badge variant="success" className="uppercase">
-              Finished
-            </Badge>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {nextStatus ? (
+              <Button
+                size="sm"
+                onClick={() => handleSetStatus(selectedSession, nextStatus)}
+                disabled={updatingExamId === selectedSession.id}
+              >
+                {updatingExamId === selectedSession.id ? "Updating…" : `Advance to ${nextStatus}`}
+              </Button>
+            ) : (
+              <Badge variant={getStatusBadgeVariant(selectedSession.status)} className="uppercase">
+                {selectedSession.status}
+              </Badge>
+            )}
+            {canCancel(selectedSession.status) && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleSetStatus(selectedSession, "Cancelled")}
+                disabled={updatingExamId === selectedSession.id}
+              >
+                Cancel exam
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -230,7 +234,9 @@ export default function ExamList() {
       <header className="space-y-2 text-center xl:text-center" style={{marginTop:"-98px"}}>
         <h1 className="text-2xl font-semibold text-white">Upcoming sessions</h1>
         <p className="text-sm text-muted-foreground">
-          Review and manage live exam sessions.
+          {usingSampleData
+            ? "Demo mode: sample exams, with status changes saved in this browser."
+            : "Review and manage live exam sessions synced from the Laravel backend."}
         </p>
       </header>
 

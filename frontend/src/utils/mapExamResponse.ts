@@ -18,7 +18,7 @@ export interface ApiExam {
 }
 
 // All statuses the UI understands. Back-end might send unexpected ones, so we normalise.
-export const validExamStatuses: ExamSessionStatus[] = ["Pending", "Started", "Finished"]
+export const validExamStatuses: ExamSessionStatus[] = ["Pending", "Started", "Finished", "Cancelled"]
 
 export function normalizeExamStatus(status: string): ExamSessionStatus {
   return validExamStatuses.includes(status as ExamSessionStatus) ? (status as ExamSessionStatus) : "Pending"

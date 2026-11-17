@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 
 import type { ExamSession } from "@/components/exam/types"
-import api from "@/utils/api"
-import { type ApiExam, mapExamListFromApi } from "@/utils/mapExamResponse"
+import { fetchExams } from "@/utils/examApi"
+import { mapExamListFromApi } from "@/utils/mapExamResponse"
 
 const mapStyles = [
   { elementType: "geometry", stylers: [{ color: "#212121" }] },
@@ -121,8 +121,7 @@ export default function MapPage() {
       setError(null)
 
       try {
-        const { data } = await api.get<ApiExam[]>("/exams", { signal: controller.signal })
-        setSessions(mapExamListFromApi(data))
+        setSessions(mapExamListFromApi(await fetchExams(controller.signal)))
       } catch (fetchError) {
         if ((fetchError as Error).name === "CanceledError") {
           return

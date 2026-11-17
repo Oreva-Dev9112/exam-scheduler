@@ -1,4 +1,4 @@
-export type ExamSessionStatus = "Pending" | "Started" | "Finished"
+export type ExamSessionStatus = "Pending" | "Started" | "Finished" | "Cancelled"
 
 export interface ExamSessionLocation {
   country: string
