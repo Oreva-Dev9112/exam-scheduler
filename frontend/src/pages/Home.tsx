@@ -26,13 +26,11 @@ export default function Home() {
         </div>
 
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-4">
-          VICTVS Exam Scheduler
+          Exam Scheduler
         </h1>
 
         <p className="mb-6 text-lg text-muted-foreground">
-          Manage, monitor, and track your global exam sessions effortlessly.
-     <br></br>
-          All In One Place.
+          Manage, monitor, and track your global exam sessions effortlessly <br/> all in one place.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4">

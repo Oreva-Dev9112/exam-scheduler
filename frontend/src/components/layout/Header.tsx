@@ -14,8 +14,8 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-border/40 bg-black/40 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex flex-col leading-none">
-          <span className="text-2xl font-extrabold text-white tracking-tight">VICTVS</span>
-          <span className="text-xs text-muted-foreground">Exam Scheduler</span>
+          <span className="text-2xl font-extrabold text-white tracking-tight">Exam Scheduler</span>
+          <span className="text-xs text-muted-foreground">Exam sessions around the world</span>
         </Link>
 
         <nav className="flex gap-2">
